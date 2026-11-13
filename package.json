@@ -1,0 +1,38 @@
+{
+  "name": "sound-2-sheet",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Convierte la grabación de un piano en una partitura, todo en el navegador.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "node scripts/copy-model.mjs",
+    "dev": "vite",
+    "dev:lan": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "serve:lan": "npm run build && vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "transcribe": "tsx scripts/transcribe-file.ts"
+  },
+  "dependencies": {
+    "@spotify/basic-pitch": "1.0.1",
+    "@tensorflow/tfjs": "3.21.0",
+    "@tonejs/midi": "2.0.28",
+    "opensheetmusicdisplay": "1.9.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.57.0",
+    "@types/node": "22.20.5",
+    "@xmldom/xmldom": "0.9.12",
+    "tsx": "4.21.1",
+    "typescript": "5.9.3",
+    "vite": "6.4.5",
+    "vitest": "4.1.12"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f2a44" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Sound 2 Sheet</title>
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <h1>Sound 2 Sheet</h1>
+        <p class="lead">Elegí la grabación de un piano y te armo la partitura.</p>
+      </header>
+
+      <section class="card">
+        <label class="file-button" for="file">Elegir audio o video</label>
+        <input id="file" type="file" accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4,.mov" />
+        <p id="file-name" class="muted" hidden></p>
+      </section>
+
+      <section id="status" class="card" hidden>
+        <p id="status-text"></p>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="status-hint" class="muted">Dejá esta pantalla abierta mientras procesa.</p>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <section id="result" hidden>
+        <p id="summary" class="summary"></p>
+
+        <form id="options" class="card options">
+          <label>
+            Tempo
+            <input id="bpm" type="number" inputmode="numeric" min="30" max="240" placeholder="auto" />
+          </label>
+          <label>
+            Compás
+            <select id="beats">
+              <option value="4">4/4</option>
+              <option value="3">3/4</option>
+              <option value="2">2/4</option>
+            </select>
+          </label>
+          <label>
+            Figura más corta
+            <select id="subdivision">
+              <option value="2" selected>Corchea</option>
+              <option value="4">Semicorchea</option>
+            </select>
+          </label>
+          <label>
+            Primer sonido en el tiempo
+            <select id="first-beat"></select>
+          </label>
+          <label class="wide">
+            Armadura
+            <select id="key"></select>
+          </label>
+          <label class="wide">
+            Sensibilidad
+            <input id="sensitivity" type="range" min="0" max="1" step="0.05" value="0.5" />
+            <span class="range-hint"><span>Menos notas</span><span>Más notas</span></span>
+          </label>
+        </form>
+
+        <div class="actions">
+          <button id="download-xml" type="button">MusicXML</button>
+          <button id="download-midi" type="button">MIDI</button>
+          <button id="print" type="button">Imprimir / PDF</button>
+        </div>
+
+        <div id="score" class="score"></div>
+
+        <div class="player">
+          <button id="play" type="button" class="play-button" aria-label="Reproducir">▶</button>
+          <div class="player-track">
+            <div class="progress"><div id="play-progress" class="progress-bar"></div></div>
+            <span id="play-time" class="muted">0:00 / 0:00</span>
+          </div>
+          <button id="rewind" type="button" class="rewind-button" aria-label="Volver al inicio">⏮</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

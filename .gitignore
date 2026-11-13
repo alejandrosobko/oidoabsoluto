@@ -1,0 +1,34 @@
+# Dependencias y builds
+node_modules/
+dist/
+
+# Modelo copiado desde node_modules en cada install (ver scripts/copy-model.mjs)
+public/model/
+
+# Salidas locales de pruebas y del script de transcripción
+out/
+test-results/
+playwright-report/
+coverage/
+
+# Audios de prueba: no se suben (derechos de autor y peso)
+*.mp3
+*.m4a
+*.wav
+*.mp4
+*.mov
+*.aac
+*.flac
+*.ogg
+# Excepción: las muestras de piano para reproducir la partitura sí van en el repo.
+!public/piano/*.mp3
+
+# Variables de entorno (la app no usa ninguna, pero por las dudas)
+.env
+.env.*
+
+# Sistema / editores
+.DS_Store
+*.log
+.vscode/
+.idea/

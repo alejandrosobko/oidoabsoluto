@@ -1,0 +1,88 @@
+import { readFileSync } from 'node:fs';
+import { basename } from 'node:path';
+import { expect, test } from '@playwright/test';
+import { cMajorExercise } from './synthPiano';
+
+test('transcribe un piano sintético y muestra la partitura', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'ejercicio.wav', mimeType: 'audio/wav', buffer: cMajorExercise() });
+
+  await expect(page.locator('#summary')).toContainText('Do mayor', { timeout: 120_000 });
+  await expect(page.locator('#summary')).toContainText('compases');
+  await expect(page.locator('#score svg')).toBeVisible();
+  expect(await page.locator('#score svg path').count()).toBeGreaterThan(50);
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#download-xml').click()]);
+  expect(download.suggestedFilename()).toBe('ejercicio.musicxml');
+
+  // Cambiar el compás rearma la partitura sin volver a procesar el audio.
+  await page.locator('#beats').selectOption('3');
+  await expect(page.locator('#first-beat option')).toHaveCount(3);
+  await expect(page.locator('#score svg')).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test('reproduce la partitura con el cursor siguiendo', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const samples: number[] = [];
+  page.on('response', (response) => {
+    if (response.url().includes('/piano/')) samples.push(response.status());
+  });
+
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'ejercicio.wav', mimeType: 'audio/wav', buffer: cMajorExercise() });
+  await expect(page.locator('#summary')).toContainText('compases', { timeout: 120_000 });
+  await expect(page.locator('#play-time')).toHaveText(/^0:00 \/ 0:\d\d$/);
+
+  const play = page.locator('#play');
+  await play.click();
+  await expect(play).toHaveAttribute('aria-label', 'Pausa');
+  expect(samples).toHaveLength(30);
+  expect(samples.every((status) => status === 200)).toBe(true);
+
+  // El cursor aparece y el tiempo avanza.
+  const cursor = page.locator('#score img[id^="cursorImg"]').first();
+  await expect(cursor).toBeVisible();
+  const startX = await cursor.evaluate((img) => img.getBoundingClientRect().x);
+  await expect(page.locator('#play-time')).toHaveText(/^0:0[2-9] \//, { timeout: 10_000 });
+  const laterX = await cursor.evaluate((img) => img.getBoundingClientRect().x);
+  expect(laterX).not.toBe(startX);
+
+  await play.click();
+  await expect(play).toHaveAttribute('aria-label', 'Reproducir');
+  const pausedAt = await page.locator('#play-time').textContent();
+  await page.waitForTimeout(1200);
+  await expect(page.locator('#play-time')).toHaveText(pausedAt ?? '');
+
+  // Cambiar una opción frena, rearma la partitura y vuelve al inicio.
+  await play.click();
+  await expect(play).toHaveAttribute('aria-label', 'Pausa');
+  await page.locator('#sensitivity').fill('0.9');
+  await expect(play).toHaveAttribute('aria-label', 'Reproducir');
+  await expect(page.locator('#play-time')).toHaveText(/^0:00 \//);
+
+  expect(errors).toEqual([]);
+});
+
+test('avisa si el archivo no es audio', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'nota.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('esto no es audio') });
+  await expect(page.locator('#error')).toContainText('No pude leer ese archivo');
+  await expect(page.locator('label[for="file"]')).toHaveAttribute('aria-disabled', 'false');
+});
+
+// Prueba opcional con una grabación real (no se versiona): SAMPLE_AUDIO="/ruta/al/audio.mp3" npm run test:e2e
+const sample = process.env.SAMPLE_AUDIO;
+test('transcribe una grabación real', async ({ page }) => {
+  test.skip(!sample, 'Definí SAMPLE_AUDIO para correr esta prueba');
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: basename(sample!), mimeType: 'audio/mpeg', buffer: readFileSync(sample!) });
+  await expect(page.locator('#summary')).toContainText('compases', { timeout: 9 * 60_000 });
+  await expect(page.locator('#score svg')).toBeVisible();
+  await page.screenshot({ path: `test-results/real-${test.info().project.name}.png`, fullPage: true });
+});
