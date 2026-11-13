@@ -17,6 +17,12 @@
       <section class="card">
         <label class="file-button" for="file">Elegir audio o video</label>
         <input id="file" type="file" accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4,.mov" />
+        <p class="or">o</p>
+        <button id="record" type="button" class="record-button">
+          <span class="record-dot" aria-hidden="true"></span>
+          <span id="record-label">Grabar</span>
+        </button>
+        <p id="record-time" class="muted record-time" hidden>Grabando… 0:00</p>
         <p id="file-name" class="muted" hidden></p>
       </section>
 

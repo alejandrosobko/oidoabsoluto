@@ -100,6 +100,42 @@ button {
   border: 1px solid var(--border);
 }
 
+.or {
+  margin: 8px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.record-button {
+  width: 100%;
+  gap: 10px;
+}
+
+.record-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e5484d;
+  flex: none;
+}
+
+.record-button.recording .record-dot {
+  border-radius: 2px;
+  animation: record-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.record-time {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 button:disabled,
 .file-button[aria-disabled='true'] {
   opacity: 0.5;

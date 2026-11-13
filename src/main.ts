@@ -1,5 +1,6 @@
 import { OpenSheetMusicDisplay } from 'opensheetmusicdisplay';
 import { decodeToModelAudio } from './audio/decode';
+import { RecorderError, startRecording, type Recording } from './audio/recorder';
 import { KEY_SIGNATURE_RANGE, keySignatureFromFifths } from './music/key';
 import { buildMidi } from './music/midi';
 import { buildScore, type ScoreResult } from './music/score';
@@ -21,6 +22,9 @@ const ui = {
   file: el<HTMLInputElement>('file'),
   fileLabel: document.querySelector<HTMLLabelElement>('label[for="file"]'),
   fileName: el<HTMLParagraphElement>('file-name'),
+  record: el<HTMLButtonElement>('record'),
+  recordLabel: el<HTMLSpanElement>('record-label'),
+  recordTime: el<HTMLParagraphElement>('record-time'),
   status: el<HTMLElement>('status'),
   statusText: el<HTMLParagraphElement>('status-text'),
   statusHint: el<HTMLParagraphElement>('status-hint'),
@@ -81,6 +85,7 @@ const playback = createPlaybackControls(
 function setBusy(busy: boolean) {
   ui.file.disabled = busy;
   ui.fileLabel?.setAttribute('aria-disabled', String(busy));
+  ui.record.disabled = busy;
 }
 
 function setStatus(text: string, fraction: number | null) {
@@ -166,6 +171,72 @@ async function handleFile(file: File) {
   }
 }
 
+interface ActiveRecording {
+  recording: Recording;
+  releaseScreen: () => void;
+  timer: number;
+}
+
+let activeRecording: ActiveRecording | null = null;
+
+function formatClock(seconds: number): string {
+  const whole = Math.floor(seconds);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+function setRecordingUi(recording: boolean) {
+  ui.record.classList.toggle('recording', recording);
+  ui.recordLabel.textContent = recording ? 'Detener y transcribir' : 'Grabar';
+  ui.recordTime.hidden = !recording;
+  ui.recordTime.textContent = 'Grabando… 0:00';
+  ui.file.disabled = recording;
+  ui.fileLabel?.setAttribute('aria-disabled', String(recording));
+}
+
+async function startMicRecording() {
+  showError(null);
+  playback.stop();
+  ui.record.disabled = true;
+  try {
+    const recording = await startRecording();
+    // Si la pantalla se apaga, el iPhone corta el micrófono: la mantenemos encendida.
+    const releaseScreen = await keepScreenOn();
+    const started = performance.now();
+    const timer = window.setInterval(() => {
+      ui.recordTime.textContent = `Grabando… ${formatClock((performance.now() - started) / 1000)}`;
+    }, 250);
+    activeRecording = { recording, releaseScreen, timer };
+    setRecordingUi(true);
+  } catch (error) {
+    console.error(error);
+    showError(error instanceof RecorderError ? error.message : 'No pude empezar a grabar.');
+  } finally {
+    ui.record.disabled = false;
+  }
+}
+
+async function stopMicRecording() {
+  if (!activeRecording) return;
+  const { recording, releaseScreen, timer } = activeRecording;
+  activeRecording = null;
+  window.clearInterval(timer);
+  releaseScreen();
+  setRecordingUi(false);
+
+  let blob: Blob;
+  try {
+    blob = await recording.stop();
+  } catch (error) {
+    console.error(error);
+    showError(error instanceof RecorderError ? error.message : 'No pude terminar la grabación.');
+    return;
+  }
+
+  const now = new Date();
+  const name = `Grabación ${now.getHours()}h${String(now.getMinutes()).padStart(2, '0')}`;
+  await handleFile(new File([blob], name, { type: blob.type }));
+}
+
 async function render() {
   if (!state.output) return;
   state.notes = extractNotes(state.output, Number(ui.sensitivity.value));
@@ -216,6 +287,9 @@ function scheduleRender() {
 ui.file.addEventListener('change', () => {
   const file = ui.file.files?.[0];
   if (file) void handleFile(file);
+});
+ui.record.addEventListener('click', () => {
+  void (activeRecording ? stopMicRecording() : startMicRecording());
 });
 ui.beats.addEventListener('change', fillFirstBeatOptions);
 ui.options.addEventListener('input', scheduleRender);
