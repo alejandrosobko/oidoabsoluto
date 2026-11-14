@@ -10,6 +10,8 @@
   --error-bg: #fef3f2;
   --install: #1a7f4b;
   --install-text: #ffffff;
+  --play: #e8590c;
+  --play-text: #ffffff;
   color-scheme: light dark;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -27,6 +29,8 @@
     --error-bg: #3a1714;
     --install: #4cc38a;
     --install-text: #0d1f16;
+    --play: #ff8a3d;
+    --play-text: #1f1206;
   }
 }
 
@@ -360,8 +364,8 @@ button:disabled,
   min-height: 52px;
   padding: 0;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-text);
+  background: var(--play);
+  color: var(--play-text);
   border: 0;
   font-size: 1.3rem;
   flex: none;
