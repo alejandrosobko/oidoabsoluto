@@ -35,6 +35,18 @@ npm run serve:lan
 
 Muestra una dirección `Network: http://192.168.x.x:4173/`. Abrila en Safari del iPhone. La Mac tiene que quedar prendida con el comando corriendo.
 
+### Instalarla en el celular
+
+La app se puede instalar como PWA (queda con su ícono en la pantalla de inicio y funciona sin internet). La primera vez que se abre en el celular aparece un aviso arriba:
+
+- **Android (Chrome):** botón **Instalar**, que abre el diálogo del navegador. El navegador no deja abrirlo sin que la persona toque algo, por eso es un botón.
+- **iPhone / iPad:** botón **Ver cómo**, con los pasos (Compartir → Agregar a inicio).
+- **Samsung Internet:** pide abrir la página en Chrome, con un botón que la abre ahí.
+
+Si se cierra el aviso, no vuelve a aparecer por 14 días. Ya instalada, no aparece.
+
+Para que funcione sin conexión, `public/sw.js` (service worker) guarda la página, el código, el modelo y las muestras de piano. Al buildear, `vite.config.ts` le agrega la lista de archivos y una versión nueva: después de cada deploy, el teléfono baja la versión nueva la próxima vez que abre la app con internet. En `npm run dev` no se registra.
+
 ### En la app
 
 1. **Elegir audio o video:** MP3, M4A, WAV, o un video MP4/MOV (por ejemplo, desde Fotos o Archivos).
@@ -106,7 +118,12 @@ src/
     samples.ts             muestras de piano y transporte
     pianoPlayer.ts         reproducción con Web Audio
   ui/playbackControls.ts   botón de reproducir y cursor sincronizado
+  ui/installBanner.ts      aviso para instalar la app (Android, iPhone, Samsung)
+  ui/installPlatform.ts    detecta el navegador para ese aviso
 public/piano/              muestras de piano (Salamander Grand Piano, CC-BY 3.0, ver ATTRIBUTION.md)
+public/icons/              íconos de la app (icon.svg es el original)
+public/manifest.webmanifest   datos para instalarla como app
+public/sw.js               service worker: la app sin internet
 scripts/
   copy-model.mjs           copia el modelo de node_modules a public/model (corre en npm install)
   transcribe-file.ts       transcripción desde la terminal

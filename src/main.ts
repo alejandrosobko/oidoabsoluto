@@ -6,6 +6,7 @@ import { buildMidi } from './music/midi';
 import { buildScore, type ScoreResult } from './music/score';
 import type { BeatsPerMeasure, PerformedNote, Subdivision } from './music/types';
 import { extractNotes, runModel, type ModelOutput } from './transcription/basicPitch';
+import { setupInstallBanner } from './ui/installBanner';
 import { createPlaybackControls } from './ui/playbackControls';
 import './style.css';
 
@@ -305,3 +306,18 @@ ui.print.addEventListener('click', () => window.print());
 
 fillFirstBeatOptions();
 fillKeyOptions();
+
+setupInstallBanner({
+  banner: el('install-banner'),
+  text: el('install-text'),
+  action: el('install-action'),
+  close: el('install-close'),
+  iosDialog: el('install-ios'),
+});
+
+// Guarda la app para usarla sin internet. En desarrollo no: serviría código viejo.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register(new URL('sw.js', document.baseURI)).catch((error: unknown) => {
+    console.warn('No pude registrar el service worker', error);
+  });
+}
