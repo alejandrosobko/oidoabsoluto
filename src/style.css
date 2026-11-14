@@ -8,6 +8,8 @@
   --border: #d9dde5;
   --error: #b42318;
   --error-bg: #fef3f2;
+  --install: #1a7f4b;
+  --install-text: #ffffff;
   color-scheme: light dark;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -23,6 +25,8 @@
     --border: #2d3240;
     --error: #fda29b;
     --error-bg: #3a1714;
+    --install: #4cc38a;
+    --install-text: #0d1f16;
   }
 }
 
@@ -54,8 +58,9 @@ body {
   gap: 10px 4px;
   margin-bottom: 12px;
   padding: 12px 6px 14px 14px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  /* Más tenue que las tarjetas: es un aviso, no la acción principal. */
+  background: color-mix(in srgb, var(--install) 8%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--install) 22%, var(--bg));
   border-radius: 12px;
 }
 
@@ -73,6 +78,11 @@ body {
 .install-banner .install-action {
   grid-area: action;
   justify-self: start;
+  min-height: 38px;
+  padding: 0 16px;
+  background: var(--install);
+  color: var(--install-text);
+  font-size: 0.9rem;
 }
 
 .install-action {
