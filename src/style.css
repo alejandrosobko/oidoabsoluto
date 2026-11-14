@@ -456,3 +456,31 @@ button:disabled,
     border-radius: 0;
   }
 }
+
+/* Nombre de la nota al pasar el mouse o tocarla. */
+.note-tooltip {
+  position: fixed;
+  z-index: 20;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+}
+
+.note-tooltip[hidden] {
+  display: none;
+}
+
+.score .vf-notehead {
+  cursor: help;
+}
+
+@media print {
+  .note-tooltip {
+    display: none !important;
+  }
+}

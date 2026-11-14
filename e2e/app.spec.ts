@@ -147,3 +147,20 @@ test('transcribe una grabación real', async ({ page }) => {
   await expect(page.locator('#score svg')).toBeVisible();
   await page.screenshot({ path: `test-results/real-${test.info().project.name}.png`, fullPage: true });
 });
+
+test('al pasar por una nota (o tocarla) dice cuál es y en qué clave', async ({ page, isMobile }) => {
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'ejercicio.wav', mimeType: 'audio/wav', buffer: cMajorExercise() });
+  await expect(page.locator('#summary')).toContainText('compases', { timeout: 120_000 });
+
+  const head = page.locator('#score .vf-notehead').first();
+  if (isMobile) await head.tap();
+  else await head.hover();
+  const tip = page.locator('.note-tooltip');
+  await expect(tip).toBeVisible();
+  await expect(tip).toHaveText(/^(Do|Re|Mi|Fa|Sol|La|Si)[♯♭]?\d · clave de (sol|fa) · compás \d+$/);
+
+  if (isMobile) await page.locator('#summary').tap();
+  else await page.mouse.move(0, 0);
+  await expect(tip).toBeHidden();
+});

@@ -58,6 +58,7 @@ Para que funcione sin conexión, `public/sw.js` (service worker) guarda la pági
    - **Primer sonido en el tiempo:** si la música arranca con anacrusa, corre las barras de compás.
    - **Armadura:** automática, o elegila a mano si la detectada no te convence (por ejemplo, entre Fa menor y Si♭ mayor).
    - **Sensibilidad:** menos = solo notas claras; más = también las suaves (y alguna fantasma).
+   - **¿Qué nota es?** Pasá el mouse por una nota (en el celular, tocala) y aparece su nombre, la clave (sol o fa) y el compás. Las octavas se cuentan con Do4 = Do central.
 4. **▶ Reproducir** toca la partitura tal como se ve, con un cursor que avanza y la página que se desplaza sola. Si cambiás una opción (por ejemplo, la sensibilidad), se frena y la próxima vez suena la versión nueva. ⏮ vuelve al inicio. En el iPhone suena aunque la llave de silencio esté puesta (iOS 17 o más nuevo).
 5. Exportar:
    - **MusicXML:** para abrir y corregir en MuseScore, Finale, Sibelius, etc.
@@ -111,6 +112,7 @@ src/
     quantize.ts            notas → grilla rítmica
     hands.ts               reparto entre manos
     key.ts                 tonalidad y nombres de notas
+    noteName.ts            nombre en solfeo de una nota (Do♯4) para el cartel
     musicxml.ts            partitura en MusicXML
     midi.ts                exportación MIDI
     tempoSuggestion.ts     sugiere el doble o el triple del tempo detectado
@@ -119,6 +121,7 @@ src/
     samples.ts             muestras de piano y transporte
     pianoPlayer.ts         reproducción con Web Audio
   ui/playbackControls.ts   botón de reproducir y cursor sincronizado
+  ui/noteTooltip.ts        cartel con el nombre de la nota al pasar el mouse o tocarla
   ui/installBanner.ts      aviso para instalar la app (Android, iPhone, Samsung)
   ui/installPlatform.ts    detecta el navegador para ese aviso
 public/piano/              muestras de piano (Salamander Grand Piano, CC-BY 3.0, ver ATTRIBUTION.md)

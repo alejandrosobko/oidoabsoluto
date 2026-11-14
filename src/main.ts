@@ -8,6 +8,7 @@ import type { TempoSuggestion } from './music/tempoSuggestion';
 import type { BeatsPerMeasure, PerformedNote, Subdivision } from './music/types';
 import { extractNotes, runModel, type ModelOutput } from './transcription/basicPitch';
 import { setupInstallBanner } from './ui/installBanner';
+import { createNoteTooltip } from './ui/noteTooltip';
 import { createPlaybackControls } from './ui/playbackControls';
 import './style.css';
 
@@ -97,6 +98,8 @@ const playback = createPlaybackControls(
   PIANO_SAMPLES_URL,
   showError,
 );
+
+const noteTooltip = createNoteTooltip(osmd, ui.score);
 
 function setBusy(busy: boolean) {
   ui.file.disabled = busy;
@@ -278,6 +281,7 @@ async function render() {
   playback.stop();
   await osmd.load(state.score.musicXml);
   osmd.render();
+  noteTooltip.refresh();
   playback.setScore(state.score);
 }
 
