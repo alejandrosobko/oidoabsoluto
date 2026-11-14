@@ -62,6 +62,17 @@ npm run transcribe -- "/ruta/al/audio.mp3" [--bpm 80] [--beats 4] [--sub 2] [--f
 
 Deja en `out/` el `.musicxml`, el `.mid` y un caché de la salida del modelo (las corridas siguientes con el mismo archivo son instantáneas). En Node el modelo corre sin GPU: tarda ~1,5 s por segundo de audio.
 
+## Publicar
+
+La app es un sitio estático y se publica en Cloudflare Pages: `https://sound-2-sheet.pages.dev`. Hace falta HTTPS para que el botón Grabar pueda usar el micrófono en el iPhone.
+
+```bash
+npx wrangler login   # solo la primera vez
+npm run deploy       # buildea y sube dist/ a Cloudflare
+```
+
+El deploy es manual: hacer push a GitHub no cambia el sitio publicado.
+
 ## Tests
 
 ```bash

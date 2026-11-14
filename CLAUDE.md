@@ -18,6 +18,9 @@ Web app que transcribe grabaciones de piano a partitura. Ver @README.md para el 
 2. `npm run test:e2e` solo cuando el cambio pueda romperlos: si toca el flujo completo (subir o grabar audio → partitura → reproducir/exportar), el HTML o la carga del modelo y las muestras. Son muy lentos, así que si el cambio no afecta nada de eso, no se corren.
 3. Para probar la transcripción con un archivo real: `npm run transcribe -- archivo.mp3`. Guarda en `out/` un caché de la salida del modelo, así que la segunda corrida es instantánea.
 
+## Publicar
+- `npm run deploy` buildea y sube `dist/` a Cloudflare Pages (`sound-2-sheet.pages.dev`). Publica en internet: no correrlo sin que lo pidan.
+
 ## Idioma
 - La interfaz, los mensajes de error, los comentarios y el README van en español.
 - Los mensajes de commit van en inglés, con Conventional Commits (`feat:`, `fix:`…).

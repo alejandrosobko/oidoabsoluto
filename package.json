@@ -17,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "transcribe": "tsx scripts/transcribe-file.ts"
+    "transcribe": "tsx scripts/transcribe-file.ts",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name sound-2-sheet --branch main"
   },
   "dependencies": {
     "@spotify/basic-pitch": "1.0.1",
@@ -32,7 +33,8 @@
     "tsx": "4.21.1",
     "typescript": "5.9.3",
     "vite": "6.4.5",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "wrangler": "4.156.0"
   },
   "license": "MIT"
 }

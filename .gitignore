@@ -32,3 +32,6 @@ coverage/
 *.log
 .vscode/
 .idea/
+
+# Caché local de wrangler (deploy a Cloudflare Pages)
+.wrangler/
