@@ -168,10 +168,14 @@ body {
   margin: 8px 0 0;
 }
 
+/* Oculto pero usable desde su <label>. Sin overflow/clip, WebKit dibuja el botón nativo
+   por fuera del 1px y la página queda más ancha que la pantalla. */
 input[type='file'] {
   position: absolute;
   width: 1px;
   height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   opacity: 0;
 }
 
