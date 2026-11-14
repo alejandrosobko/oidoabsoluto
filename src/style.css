@@ -43,9 +43,16 @@ body {
   background: var(--bg);
   color: var(--text);
   -webkit-text-size-adjust: 100%;
+  /* La página ocupa al menos toda la pantalla, así el footer queda abajo de todo. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .app {
+  flex: 1 0 auto;
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
   padding: max(16px, env(safe-area-inset-top)) 16px 48px;
@@ -390,6 +397,19 @@ button:disabled,
   font-variant-numeric: tabular-nums;
 }
 
+.app-footer {
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.app-footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 @media print {
   body {
     background: #ffffff;
@@ -401,7 +421,8 @@ button:disabled,
   }
 
   .app > :not(#result),
-  #result > :not(#score) {
+  #result > :not(#score),
+  .app-footer {
     display: none !important;
   }
 
