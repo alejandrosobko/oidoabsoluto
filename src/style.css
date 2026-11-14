@@ -12,6 +12,8 @@
   --install-text: #ffffff;
   --play: #e8590c;
   --play-text: #ffffff;
+  --hint-bg: #eef4ff;
+  --hint-border: #2f6fed;
   color-scheme: light dark;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -31,6 +33,8 @@
     --install-text: #0d1f16;
     --play: #ff8a3d;
     --play-text: #1f1206;
+    --hint-bg: #17213a;
+    --hint-border: #7aa2ff;
   }
 }
 
@@ -288,6 +292,28 @@ button:disabled,
   font-size: 1.1rem;
   font-weight: 600;
   margin: 4px 0 12px;
+}
+
+/* Sugerencia de tempo: un aviso con un botón para aplicarla o deshacerla. */
+.tempo-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  background: var(--hint-bg);
+  border-left: 4px solid var(--hint-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.tempo-hint[hidden] {
+  display: none;
+}
+
+.tempo-hint p {
+  flex: 1 1 220px;
+  margin: 0;
 }
 
 .options {

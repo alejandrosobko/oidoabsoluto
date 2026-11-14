@@ -33,6 +33,9 @@ const ui = {
   error: el<HTMLParagraphElement>('error'),
   result: el<HTMLElement>('result'),
   summary: el<HTMLParagraphElement>('summary'),
+  tempoHint: el<HTMLDivElement>('tempo-hint'),
+  tempoHintText: el<HTMLParagraphElement>('tempo-hint-text'),
+  tempoHintAction: el<HTMLButtonElement>('tempo-hint-action'),
   options: el<HTMLFormElement>('options'),
   bpm: el<HTMLInputElement>('bpm'),
   beats: el<HTMLSelectElement>('beats'),
@@ -55,9 +58,11 @@ interface State {
   output: ModelOutput | null;
   notes: PerformedNote[];
   score: ScoreResult | null;
+  /** Si se aplicó la sugerencia de tempo: el tempo de antes y el puesto, para poder volver. */
+  appliedTempo: { from: number; to: number } | null;
 }
 
-const state: State = { title: '', output: null, notes: [], score: null };
+const state: State = { title: '', output: null, notes: [], score: null, appliedTempo: null };
 
 const osmd = new OpenSheetMusicDisplay(ui.score, {
   backend: 'svg',
@@ -134,6 +139,11 @@ async function handleFile(file: File) {
   playback.stop();
   ui.result.hidden = true;
   state.output = null;
+  // Un tempo puesto por la sugerencia era para el audio anterior: el nuevo arranca en automático.
+  if (state.appliedTempo) {
+    ui.bpm.value = '';
+    state.appliedTempo = null;
+  }
   state.title = file.name.replace(/\.[^.]+$/, '');
   ui.fileName.hidden = false;
   ui.fileName.textContent = file.name;
@@ -254,6 +264,7 @@ async function render() {
   const { key, bpm, measureCount, detectedBpm } = state.score;
   ui.summary.textContent = `${key.name} · ♩ = ${Math.round(bpm)} · ${measureCount} compases`;
   ui.bpm.placeholder = `auto (${Math.round(detectedBpm)})`;
+  updateTempoHint(state.score);
   ui.result.hidden = false;
 
   osmd.zoom = window.innerWidth < 600 ? 0.55 : 0.9;
@@ -261,6 +272,38 @@ async function render() {
   await osmd.load(state.score.musicXml);
   osmd.render();
   playback.setScore(state.score);
+}
+
+/** Muestra la sugerencia de tempo, o la opción de deshacerla si ya se aplicó. */
+function updateTempoHint(score: ScoreResult) {
+  // Si después de aplicarla se escribió otro tempo a mano, la sugerencia ya no corre.
+  if (state.appliedTempo && Number(ui.bpm.value) !== state.appliedTempo.to) state.appliedTempo = null;
+
+  if (state.appliedTempo) {
+    const { from, to } = state.appliedTempo;
+    const meterTip = ui.beats.value === '4' ? ' Si la melodía se repite cada 3 tiempos, probá también Compás 3/4.' : '';
+    ui.tempoHintText.textContent = `Tempo cambiado a ♩ = ${to} (antes ${from}).${meterTip}`;
+    ui.tempoHintAction.textContent = `Volver a ♩ = ${from}`;
+    ui.tempoHint.hidden = false;
+  } else if (score.suggestedBpm) {
+    ui.tempoHintText.textContent =
+      'Hay notas muy seguidas que quedan encimadas. Puede que el tempo real sea el doble.';
+    ui.tempoHintAction.textContent = `Probar ♩ = ${score.suggestedBpm}`;
+    ui.tempoHint.hidden = false;
+  } else {
+    ui.tempoHint.hidden = true;
+  }
+}
+
+function toggleSuggestedTempo() {
+  if (state.appliedTempo) {
+    ui.bpm.value = '';
+    state.appliedTempo = null;
+  } else if (state.score?.suggestedBpm) {
+    state.appliedTempo = { from: Math.round(state.score.bpm), to: state.score.suggestedBpm };
+    ui.bpm.value = String(state.score.suggestedBpm);
+  }
+  scheduleRender();
 }
 
 function download(data: BlobPart, filename: string, type: string) {
@@ -303,6 +346,7 @@ ui.downloadMidi.addEventListener('click', () => {
   if (state.notes.length) download(new Uint8Array(buildMidi(state.notes, state.title)), `${state.title}.mid`, 'audio/midi');
 });
 ui.print.addEventListener('click', () => window.print());
+ui.tempoHintAction.addEventListener('click', toggleSuggestedTempo);
 
 fillFirstBeatOptions();
 fillKeyOptions();

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { cMajorExercise } from './synthPiano';
+import { carolMotif, cMajorExercise } from './synthPiano';
 
 test('transcribe un piano sintético y muestra la partitura', async ({ page }) => {
   const errors: string[] = [];
@@ -65,6 +65,41 @@ test('reproduce la partitura con el cursor siguiendo', async ({ page }) => {
   await page.locator('#sensitivity').fill('0.9');
   await expect(play).toHaveAttribute('aria-label', 'Reproducir');
   await expect(page.locator('#play-time')).toHaveText(/^0:00 \//);
+
+  expect(errors).toEqual([]);
+});
+
+test('sugiere duplicar el tempo y deja volver atrás', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'carol.wav', mimeType: 'audio/wav', buffer: carolMotif() });
+  await expect(page.locator('#summary')).toContainText('compases', { timeout: 120_000 });
+
+  const hint = page.locator('#tempo-hint');
+  const action = page.locator('#tempo-hint-action');
+  await expect(hint).toBeVisible();
+  await expect(action).toHaveText(/^Probar ♩ = 15\d$/);
+  const suggested = (await action.textContent())!.replace(/\D/g, '');
+  await page.screenshot({ path: `test-results/tempo-hint-${test.info().project.name}.png` });
+
+  // Aplicar: el tempo queda escrito y el aviso ofrece volver.
+  await action.click();
+  await expect(page.locator('#bpm')).toHaveValue(suggested);
+  await expect(page.locator('#summary')).toContainText(`♩ = ${suggested}`);
+  await expect(action).toHaveText(/^Volver a ♩ = 7\d$/);
+  await expect(page.locator('#tempo-hint-text')).toContainText('3/4');
+  await page.screenshot({ path: `test-results/tempo-hint-applied-${test.info().project.name}.png` });
+
+  // Volver: el tempo vuelve a automático y la sugerencia reaparece.
+  await action.click();
+  await expect(page.locator('#bpm')).toHaveValue('');
+  await expect(action).toHaveText(/^Probar ♩ = /);
+
+  // Si se escribe un tempo a mano, el aviso desaparece.
+  await page.locator('#bpm').fill('100');
+  await expect(hint).toBeHidden();
 
   expect(errors).toEqual([]);
 });

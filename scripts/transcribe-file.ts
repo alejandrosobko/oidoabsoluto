@@ -94,4 +94,5 @@ writeFileSync(join(outDir, `${name}.mid`), buildMidi(notes, name));
 console.log(
   `${notes.length} notas · ${score.key.name} · ${Math.round(score.bpm)} bpm (detectado ${Math.round(score.detectedBpm)}) · ${score.measureCount} compases`,
 );
+if (score.suggestedBpm) console.log(`Sugerencia: hay notas encimadas, probá --bpm ${score.suggestedBpm}`);
 console.log(`Listo: out/${name}.musicxml y out/${name}.mid`);

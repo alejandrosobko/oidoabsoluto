@@ -57,3 +57,27 @@ export function cMajorExercise(): Buffer {
   ];
   return synthPianoWav(notes, 0.5 + 16 * beat + 1);
 }
+
+/**
+ * El motivo de Carol of the Bells (Leontovych, 1916, dominio público) en 3/4 a 154 bpm:
+ * Si♭ negra, La–Si♭ corcheas, Sol negra, con un bajo por compás. Es rápido: el tempo
+ * se detecta a la mitad y la app tiene que sugerir el doble.
+ */
+export function carolMotif(): Buffer {
+  const beat = 60 / 154;
+  const motif = [
+    { at: 0, pitch: 70, length: 1 },
+    { at: 1, pitch: 69, length: 0.5 },
+    { at: 1.5, pitch: 70, length: 0.5 },
+    { at: 2, pitch: 67, length: 1 },
+  ];
+  const bass = [43, 41, 39, 38];
+  const notes: SynthNote[] = [];
+  const bars = 12;
+  for (let bar = 0; bar < bars; bar++) {
+    const t0 = 0.5 + bar * 3 * beat;
+    notes.push({ pitch: bass[bar % bass.length]!, start: t0, duration: 3 * beat * 0.95 });
+    for (const m of motif) notes.push({ pitch: m.pitch, start: t0 + m.at * beat, duration: m.length * beat * 0.9 });
+  }
+  return synthPianoWav(notes, 0.5 + bars * 3 * beat + 1);
+}
