@@ -3,7 +3,7 @@
 Web app que transcribe grabaciones de piano a partitura. Ver @README.md para el flujo y la estructura.
 
 ## Restricciones que no se negocian
-- Todo corre en el navegador: nada de servidor, APIs externas, cuentas ni variables de entorno. El audio nunca sale del dispositivo.
+- Todo corre en el navegador: nada de servidor, APIs externas, cuentas ni variables de entorno. El audio nunca sale del dispositivo. De ser necesario cambiar esto, consultarlo primero.
 - Tiene que andar en Safari de iPhone (WebKit). Antes de usar cualquier API web nueva, revisar que exista en iOS 17.
 - Las rutas a recursos son relativas (`base: './'`). Armar las URLs con `new URL('...', document.baseURI)`, nunca con `/` al principio.
 
