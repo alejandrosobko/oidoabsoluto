@@ -52,7 +52,7 @@ Para que funcione sin conexión, `public/sw.js` (service worker) guarda la pági
 1. **Elegir audio o video:** MP3, M4A, WAV, o un video MP4/MOV (por ejemplo, desde Fotos o Archivos).
 2. Esperar mientras procesa (hay barra de progreso). Dejar la pantalla abierta.
 3. Ajustar si hace falta; la partitura se rearma al instante, sin volver a procesar:
-   - **Tempo:** vacío = automático. Si sale el doble o la mitad de lo esperado, escribí el valor correcto. Si hay muchas notas encimadas (señal de que el tempo se detectó a la mitad), aparece un aviso con un botón para probar el doble y otro para volver atrás.
+   - **Tempo:** vacío = automático. Si sale el doble o la mitad de lo esperado, escribí el valor correcto. Si el tempo parece haberse detectado a la mitad (muchas notas encimadas) o a un tercio (notas que se agrupan de a 3), aparece un aviso con un botón para probar el doble, o el triple en 3/4, y otro para volver a como estaba.
    - **Compás:** 4/4, 3/4 o 2/4.
    - **Figura más corta:** corchea (por defecto) da una lectura más limpia; semicorchea es más fiel pero muestra cada pequeño rubato como figuras con puntillo.
    - **Primer sonido en el tiempo:** si la música arranca con anacrusa, corre las barras de compás.
@@ -113,7 +113,7 @@ src/
     key.ts                 tonalidad y nombres de notas
     musicxml.ts            partitura en MusicXML
     midi.ts                exportación MIDI
-    tempoSuggestion.ts     sugiere duplicar el tempo si hay notas encimadas
+    tempoSuggestion.ts     sugiere el doble o el triple del tempo detectado
     score.ts               une todo lo anterior
   playback/
     samples.ts             muestras de piano y transporte

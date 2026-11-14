@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { carolMotif, cMajorExercise } from './synthPiano';
+import { carolMotif, cMajorExercise, hedwigMotif } from './synthPiano';
 
 test('transcribe un piano sintético y muestra la partitura', async ({ page }) => {
   const errors: string[] = [];
@@ -100,6 +100,32 @@ test('sugiere duplicar el tempo y deja volver atrás', async ({ page }) => {
   // Si se escribe un tempo a mano, el aviso desaparece.
   await page.locator('#bpm').fill('100');
   await expect(hint).toBeHidden();
+
+  expect(errors).toEqual([]);
+});
+
+test('sugiere el triple en 3/4 y al volver restaura tempo y compás', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await page.goto('/');
+  await page.locator('#file').setInputFiles({ name: 'hedwig.wav', mimeType: 'audio/wav', buffer: hedwigMotif() });
+  await expect(page.locator('#summary')).toContainText('compases', { timeout: 120_000 });
+
+  const action = page.locator('#tempo-hint-action');
+  await expect(action).toHaveText(/^Probar ♩ = 1[67]\d en 3\/4$/);
+  await action.click();
+  await expect(page.locator('#beats')).toHaveValue('3');
+  await expect(page.locator('#first-beat')).toHaveValue('3');
+  await expect(page.locator('#summary')).toContainText(/♩ = 1[67]\d/);
+  await expect(action).toHaveText(/^Volver a ♩ = 5\d en 4\/4$/);
+  await page.screenshot({ path: `test-results/tempo-hint-triple-${test.info().project.name}.png` });
+
+  await action.click();
+  await expect(page.locator('#bpm')).toHaveValue('');
+  await expect(page.locator('#beats')).toHaveValue('4');
+  await expect(page.locator('#first-beat')).toHaveValue('1');
+  await expect(action).toHaveText(/^Probar ♩ = /);
 
   expect(errors).toEqual([]);
 });

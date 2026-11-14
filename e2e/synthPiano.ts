@@ -81,3 +81,24 @@ export function carolMotif(): Buffer {
   }
   return synthPianoWav(notes, 0.5 + bars * 3 * beat + 1);
 }
+
+/**
+ * El comienzo de Hedwig's Theme en 3/4 a 165 bpm, con anacrusa. El pulso que más se oye
+ * es el del compás: el tempo se detecta a un tercio y la app tiene que sugerir el triple en 3/4.
+ */
+export function hedwigMotif(): Buffer {
+  const beat = 60 / 165;
+  const phrase: [number, number][] = [
+    [59, 1], [64, 1.5], [67, 0.5], [66, 1], [64, 2], [71, 1], [69, 3], [66, 3],
+    [64, 1.5], [67, 0.5], [66, 1], [63, 2], [65, 1], [59, 3], [59, 2],
+  ];
+  const notes: SynthNote[] = [];
+  let t = 0.5;
+  for (let i = 0; i < 2; i++) {
+    for (const [pitch, length] of phrase) {
+      notes.push({ pitch, start: t, duration: length * beat * 0.9 });
+      t += length * beat;
+    }
+  }
+  return synthPianoWav(notes, t + 1);
+}

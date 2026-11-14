@@ -3,7 +3,7 @@ import { splitHands } from './hands';
 import { detectKey, keySignatureFromFifths } from './key';
 import { buildMusicXml, scoreLength, writtenNotes } from './musicxml';
 import { mergeChordOnsets, quantizeNotes } from './quantize';
-import { suggestTempo } from './tempoSuggestion';
+import { suggestTempo, type TempoSuggestion } from './tempoSuggestion';
 import type { KeySignature, PerformedNote, ScoreOptions } from './types';
 
 export interface ScoreResult {
@@ -13,10 +13,10 @@ export interface ScoreResult {
   /** Tempo detectado automáticamente, para mostrarlo aunque se haya forzado otro. */
   detectedBpm: number;
   /**
-   * Si hay muchas notas encimadas con el tempo detectado, el doble para sugerirlo.
+   * Si el tempo detectado parece la mitad o un tercio del real, el tempo (y compás) a sugerir.
    * Solo se calcula con el tempo automático.
    */
-  suggestedBpm?: number;
+  tempoSuggestion?: TempoSuggestion;
   key: KeySignature;
   measureCount: number;
   noteCount: number;
@@ -48,7 +48,8 @@ export function buildScore(performed: PerformedNote[], options: ScoreOptions): S
   const lastTime = Math.max(...notes.map((n) => n.start + n.duration));
   const beats = alignBeats(trackBeats(envelope, targetBpm), firstOnset, lastTime, targetBpm);
   const bpm = options.bpm && options.bpm > 0 ? options.bpm : medianBpm(beats);
-  const suggestedBpm = options.bpm && options.bpm > 0 ? undefined : suggestTempo(notes, beats, bpm);
+  const tempoSuggestion =
+    options.bpm && options.bpm > 0 ? undefined : suggestTempo({ notes, envelope, beats, bpm, firstOnset, lastTime });
 
   const measureLength = options.beatsPerMeasure * options.subdivision;
   const quantized = quantizeNotes(notes, beats, options.subdivision);
@@ -82,7 +83,7 @@ export function buildScore(performed: PerformedNote[], options: ScoreOptions): S
     musicXml,
     bpm,
     detectedBpm,
-    suggestedBpm,
+    tempoSuggestion,
     key,
     measureCount: total / measureLength,
     noteCount: grid.length,

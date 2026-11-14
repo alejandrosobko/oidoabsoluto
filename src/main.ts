@@ -4,6 +4,7 @@ import { RecorderError, startRecording, type Recording } from './audio/recorder'
 import { KEY_SIGNATURE_RANGE, keySignatureFromFifths } from './music/key';
 import { buildMidi } from './music/midi';
 import { buildScore, type ScoreResult } from './music/score';
+import type { TempoSuggestion } from './music/tempoSuggestion';
 import type { BeatsPerMeasure, PerformedNote, Subdivision } from './music/types';
 import { extractNotes, runModel, type ModelOutput } from './transcription/basicPitch';
 import { setupInstallBanner } from './ui/installBanner';
@@ -53,13 +54,22 @@ const ui = {
   playTime: el<HTMLSpanElement>('play-time'),
 };
 
+interface AppliedTempo {
+  suggestion: TempoSuggestion;
+  /** Tempo que se usaba antes de aplicarla. */
+  fromBpm: number;
+  /** Compás y primer sonido de antes (valores de los selectores). */
+  fromBeats: string;
+  fromFirstBeat: string;
+}
+
 interface State {
   title: string;
   output: ModelOutput | null;
   notes: PerformedNote[];
   score: ScoreResult | null;
-  /** Si se aplicó la sugerencia de tempo: el tempo de antes y el puesto, para poder volver. */
-  appliedTempo: { from: number; to: number } | null;
+  /** Si se aplicó la sugerencia de tempo: lo que había antes y lo que se puso, para poder volver. */
+  appliedTempo: AppliedTempo | null;
 }
 
 const state: State = { title: '', output: null, notes: [], score: null, appliedTempo: null };
@@ -139,11 +149,8 @@ async function handleFile(file: File) {
   playback.stop();
   ui.result.hidden = true;
   state.output = null;
-  // Un tempo puesto por la sugerencia era para el audio anterior: el nuevo arranca en automático.
-  if (state.appliedTempo) {
-    ui.bpm.value = '';
-    state.appliedTempo = null;
-  }
+  // Un tempo puesto por la sugerencia era para el audio anterior: el nuevo arranca como estaba.
+  revertSuggestedTempo();
   state.title = file.name.replace(/\.[^.]+$/, '');
   ui.fileName.hidden = false;
   ui.fileName.textContent = file.name;
@@ -277,32 +284,64 @@ async function render() {
 /** Muestra la sugerencia de tempo, o la opción de deshacerla si ya se aplicó. */
 function updateTempoHint(score: ScoreResult) {
   // Si después de aplicarla se escribió otro tempo a mano, la sugerencia ya no corre.
-  if (state.appliedTempo && Number(ui.bpm.value) !== state.appliedTempo.to) state.appliedTempo = null;
+  if (state.appliedTempo && Number(ui.bpm.value) !== state.appliedTempo.suggestion.bpm) state.appliedTempo = null;
 
-  if (state.appliedTempo) {
-    const { from, to } = state.appliedTempo;
-    const meterTip = ui.beats.value === '4' ? ' Si la melodía se repite cada 3 tiempos, probá también Compás 3/4.' : '';
-    ui.tempoHintText.textContent = `Tempo cambiado a ♩ = ${to} (antes ${from}).${meterTip}`;
-    ui.tempoHintAction.textContent = `Volver a ♩ = ${from}`;
+  const applied = state.appliedTempo;
+  const suggestion = score.tempoSuggestion;
+  if (applied) {
+    const { bpm, beatsPerMeasure } = applied.suggestion;
+    if (beatsPerMeasure) {
+      const before = `${applied.fromBpm} en ${applied.fromBeats}/4`;
+      ui.tempoHintText.textContent = `Tempo cambiado a ♩ = ${bpm} en ${beatsPerMeasure}/4 (antes ${before}).`;
+      ui.tempoHintAction.textContent = `Volver a ♩ = ${before}`;
+    } else {
+      const meterTip =
+        ui.beats.value === '4' ? ' Si la melodía se repite cada 3 tiempos, probá también Compás 3/4.' : '';
+      ui.tempoHintText.textContent = `Tempo cambiado a ♩ = ${bpm} (antes ${applied.fromBpm}).${meterTip}`;
+      ui.tempoHintAction.textContent = `Volver a ♩ = ${applied.fromBpm}`;
+    }
     ui.tempoHint.hidden = false;
-  } else if (score.suggestedBpm) {
+  } else if (suggestion?.factor === 3) {
+    ui.tempoHintText.textContent =
+      'Las notas se agrupan de a 3 y no entran bien en la grilla. Puede que el tempo real sea el triple, en compás de 3.';
+    ui.tempoHintAction.textContent = `Probar ♩ = ${suggestion.bpm} en ${suggestion.beatsPerMeasure}/4`;
+    ui.tempoHint.hidden = false;
+  } else if (suggestion) {
     ui.tempoHintText.textContent =
       'Hay notas muy seguidas que quedan encimadas. Puede que el tempo real sea el doble.';
-    ui.tempoHintAction.textContent = `Probar ♩ = ${score.suggestedBpm}`;
+    ui.tempoHintAction.textContent = `Probar ♩ = ${suggestion.bpm}`;
     ui.tempoHint.hidden = false;
   } else {
     ui.tempoHint.hidden = true;
   }
 }
 
-function toggleSuggestedTempo() {
-  if (state.appliedTempo) {
-    ui.bpm.value = '';
-    state.appliedTempo = null;
-  } else if (state.score?.suggestedBpm) {
-    state.appliedTempo = { from: Math.round(state.score.bpm), to: state.score.suggestedBpm };
-    ui.bpm.value = String(state.score.suggestedBpm);
+/** Deja el tempo, el compás y el primer sonido como estaban antes de aplicar la sugerencia. */
+function revertSuggestedTempo() {
+  const applied = state.appliedTempo;
+  if (!applied) return;
+  ui.bpm.value = '';
+  if (applied.suggestion.beatsPerMeasure) {
+    ui.beats.value = applied.fromBeats;
+    fillFirstBeatOptions();
+    ui.firstBeat.value = applied.fromFirstBeat;
   }
+  state.appliedTempo = null;
+}
+
+function applySuggestedTempo(suggestion: TempoSuggestion, fromBpm: number) {
+  state.appliedTempo = { suggestion, fromBpm, fromBeats: ui.beats.value, fromFirstBeat: ui.firstBeat.value };
+  ui.bpm.value = String(suggestion.bpm);
+  if (suggestion.beatsPerMeasure) {
+    ui.beats.value = String(suggestion.beatsPerMeasure);
+    fillFirstBeatOptions();
+    ui.firstBeat.value = String(suggestion.firstBeat ?? 1);
+  }
+}
+
+function toggleSuggestedTempo() {
+  if (state.appliedTempo) revertSuggestedTempo();
+  else if (state.score?.tempoSuggestion) applySuggestedTempo(state.score.tempoSuggestion, Math.round(state.score.bpm));
   scheduleRender();
 }
 

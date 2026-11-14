@@ -94,5 +94,9 @@ writeFileSync(join(outDir, `${name}.mid`), buildMidi(notes, name));
 console.log(
   `${notes.length} notas · ${score.key.name} · ${Math.round(score.bpm)} bpm (detectado ${Math.round(score.detectedBpm)}) · ${score.measureCount} compases`,
 );
-if (score.suggestedBpm) console.log(`Sugerencia: hay notas encimadas, probá --bpm ${score.suggestedBpm}`);
+const suggestion = score.tempoSuggestion;
+if (suggestion) {
+  const meter = suggestion.beatsPerMeasure ? ` --beats ${suggestion.beatsPerMeasure} --first ${suggestion.firstBeat}` : '';
+  console.log(`Sugerencia: el tempo real parece ${suggestion.factor === 2 ? 'el doble' : 'el triple'}, probá --bpm ${suggestion.bpm}${meter}`);
+}
 console.log(`Listo: out/${name}.musicxml y out/${name}.mid`);
