@@ -89,7 +89,7 @@ export function setupInstallBanner(ui: InstallBannerElements) {
       break;
 
     case 'ios':
-      show('Instalá Sound 2 Sheet en la pantalla de inicio para abrirla como una app, también sin internet.', 'Ver cómo', () =>
+      show('Instalá Oído absoluto en la pantalla de inicio para abrirla como una app, también sin internet.', 'Ver cómo', () =>
         ui.iosDialog.showModal(),
       );
       break;
@@ -101,7 +101,7 @@ export function setupInstallBanner(ui: InstallBannerElements) {
       const offer = () => {
         const prompt = window.installPromptEvent;
         if (!prompt) return;
-        show('Instalá Sound 2 Sheet para abrirla como una app, también sin internet.', 'Instalar', () => {
+        show('Instalá Oído absoluto para abrirla como una app, también sin internet.', 'Instalar', () => {
           hide();
           window.installPromptEvent = undefined;
           void prompt.prompt();

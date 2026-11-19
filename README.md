@@ -1,6 +1,6 @@
-# Sound 2 Sheet
+# Oído absoluto
 
-**sound-2-sheet** es una web app que escucha la grabación de un piano y arma la partitura (clave de sol y de fa). Todo corre en el navegador: el audio no sale del dispositivo, no hay servidor, no hay cuentas ni claves, y no tiene costo.
+**Oído absoluto** (repo `sound-2-sheet`) es una web app que escucha la grabación de un piano y arma la partitura (clave de sol y de fa). Todo corre en el navegador: el audio no sale del dispositivo, no hay servidor, no hay cuentas ni claves, y no tiene costo.
 
 Funciona en Safari del iPhone y en cualquier navegador moderno.
 
@@ -77,7 +77,7 @@ Deja en `out/` el `.musicxml`, el `.mid` y un caché de la salida del modelo (la
 
 ## Publicar
 
-La app es un sitio estático y se publica en Cloudflare Pages: `https://sound-2-sheet.pages.dev`. Hace falta HTTPS para que el botón Grabar pueda usar el micrófono en el iPhone.
+La app es un sitio estático y se publica en Cloudflare Pages: `https://oidoabsoluto.pages.dev`. Hace falta HTTPS para que el botón Grabar pueda usar el micrófono en el iPhone.
 
 ```bash
 npx wrangler login   # solo la primera vez

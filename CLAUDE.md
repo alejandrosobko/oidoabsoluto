@@ -19,7 +19,7 @@ Web app que transcribe grabaciones de piano a partitura. Ver @README.md para el 
 3. Para probar la transcripción con un archivo real: `npm run transcribe -- archivo.mp3`. Guarda en `out/` un caché de la salida del modelo, así que la segunda corrida es instantánea.
 
 ## Publicar
-- `npm run deploy` buildea y sube `dist/` a Cloudflare Pages (`sound-2-sheet.pages.dev`). Publica en internet: no correrlo sin que lo pidan.
+- `npm run deploy` buildea y sube `dist/` a Cloudflare Pages (`oidoabsoluto.pages.dev`). Publica en internet: no correrlo sin que lo pidan.
 
 ## Idioma
 - La interfaz, los mensajes de error, los comentarios y el README van en español.
