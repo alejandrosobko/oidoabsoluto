@@ -1,5 +1,6 @@
 import type { PlaybackNote } from '../music/score';
 import { nearestSample, PIANO_SAMPLES, velocityToGain } from './samples';
+import { setAudioSession } from '../audio/audioSession';
 
 /** Cuánto antes se programan las notas en el reloj de audio (evita cortes si el hilo se demora). */
 const LOOKAHEAD_SECONDS = 0.25;
@@ -64,8 +65,9 @@ export class PianoPlayer {
    * Safari solo deja sonar audio que arrancó con un gesto.
    */
   unlock(): AudioContext {
+    // Después de grabar, la sesión quedó en play-and-record: se vuelve a playback en cada toque.
+    setAudioSession('playback');
     if (!this.context) {
-      allowSoundWithSilentSwitch();
       this.context = new AudioContext();
       // Ganancia de entrada para que se oiga bien en el parlante del teléfono;
       // el compresor contiene los picos cuando suenan muchos acordes juntos.
@@ -183,13 +185,4 @@ export class PianoPlayer {
     this.voices.add(voice);
     source.onended = () => this.voices.delete(voice);
   }
-}
-
-/**
- * En el iPhone, con la llave de silencio puesta, Safari silencia Web Audio. Desde iOS 17
- * se puede declarar que la página reproduce música; en versiones anteriores no hay arreglo limpio.
- */
-function allowSoundWithSilentSwitch() {
-  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
-  if (session) session.type = 'playback';
 }

@@ -1,3 +1,5 @@
+import { setAudioSession } from './audioSession';
+
 /** Una grabación del micrófono en curso. `stop()` la termina y devuelve el audio grabado. */
 export interface Recording {
   stop(): Promise<Blob>;
@@ -23,6 +25,8 @@ export async function startRecording(): Promise<Recording> {
     );
   }
 
+  // Si antes se reprodujo la partitura, la sesión está en playback y Safari niega el micrófono.
+  setAudioSession('play-and-record');
   let stream: MediaStream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({
