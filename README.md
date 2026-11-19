@@ -1,6 +1,6 @@
 # Oído absoluto
 
-**Oído absoluto** (repo `sound-2-sheet`) es una web app que escucha la grabación de un piano y arma la partitura (clave de sol y de fa). Todo corre en el navegador: el audio no sale del dispositivo, no hay servidor, no hay cuentas ni claves, y no tiene costo.
+**Oído absoluto** es una web app que escucha la grabación de un piano y arma la partitura (clave de sol y de fa). Todo corre en el navegador: el audio no sale del dispositivo, no hay servidor, no hay cuentas ni claves, y no tiene costo.
 
 Funciona en Safari del iPhone y en cualquier navegador moderno.
 

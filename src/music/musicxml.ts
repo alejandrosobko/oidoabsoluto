@@ -198,7 +198,7 @@ export function buildMusicXml(model: ScoreModel): string {
     '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">',
     '<score-partwise version="3.1">',
     `<work><work-title>${escapeXml(model.title)}</work-title></work>`,
-    '<identification><encoding><software>sound-2-sheet</software></encoding></identification>',
+    '<identification><encoding><software>Oído absoluto</software></encoding></identification>',
     '<part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>',
     '<part id="P1">',
     ...measuresXml,

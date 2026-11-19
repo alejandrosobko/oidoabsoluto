@@ -78,6 +78,7 @@ describe('buildMusicXml', () => {
     expect(doc.getElementsByTagName('fifths')[0]?.textContent).toBe('-4');
     expect(doc.getElementsByTagName('per-minute')[0]?.textContent).toBe('76');
     expect(doc.getElementsByTagName('staves')[0]?.textContent).toBe('2');
+    expect(doc.getElementsByTagName('software')[0]?.textContent).toBe('Oído absoluto');
   });
 
   it('cada compás de cada pentagrama suma exactamente su largo', () => {

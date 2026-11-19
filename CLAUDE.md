@@ -1,4 +1,4 @@
-# sound-2-sheet
+# Oído absoluto
 
 Web app que transcribe grabaciones de piano a partitura. Ver @README.md para el flujo y la estructura.
 
