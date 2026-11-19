@@ -261,6 +261,18 @@ async function stopMicRecording() {
 async function render() {
   if (!state.output) return;
   state.notes = extractNotes(state.output, Number(ui.sensitivity.value));
+  playback.stop();
+  if (state.notes.length === 0) {
+    // Sin notas no hay partitura, pero las opciones quedan a mano para subir la sensibilidad.
+    state.score = null;
+    osmd.clear();
+    ui.summary.textContent = '';
+    ui.tempoHint.hidden = true;
+    setScoreActionsEnabled(false);
+    ui.result.hidden = false;
+    showError('No se detectaron notas. Probá subir la sensibilidad.');
+    return;
+  }
   const forcedBpm = Number(ui.bpm.value);
   state.score = buildScore(state.notes, {
     bpm: Number.isFinite(forcedBpm) && forcedBpm > 0 ? forcedBpm : undefined,
@@ -278,11 +290,16 @@ async function render() {
   ui.result.hidden = false;
 
   osmd.zoom = window.innerWidth < 600 ? 0.55 : 0.9;
-  playback.stop();
   await osmd.load(state.score.musicXml);
   osmd.render();
   noteTooltip.refresh();
   playback.setScore(state.score);
+  setScoreActionsEnabled(true);
+  showError(null);
+}
+
+function setScoreActionsEnabled(enabled: boolean) {
+  for (const button of [ui.play, ui.rewind, ui.downloadXml, ui.downloadMidi, ui.print]) button.disabled = !enabled;
 }
 
 /** Muestra la sugerencia de tempo, o la opción de deshacerla si ya se aplicó. */
